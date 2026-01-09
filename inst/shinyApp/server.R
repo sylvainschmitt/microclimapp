@@ -42,6 +42,7 @@ function(input, output, session) {
   rv <- reactiveValues(
     macro = NULL, # macroclimate dataframe
     micro = NULL, # microclimate dataframe
+    data = NULL # whole dataset
   )
 
   ## Buttons ----
@@ -104,59 +105,63 @@ function(input, output, session) {
   ## Preview ----
   observeEvent(input$btn_load_macro, ignoreInit = TRUE, {
     output$out_macro_gg <- renderPlot({
-      time <- input$sel_macro_time
-      tas <- input$sel_macro_tas
       rv$macro %>%
-        ggplot(aes(time, tas)) +
+        ggplot(aes(.data[[input$sel_macro_time]],
+                   .data[[input$sel_macro_tas]])) +
         geom_line() +
         theme_bw()
     })
   })
 
+  # MICRO ----
 
-  #
-  # # LOAD MICRO ---------------------------------------------------------------
-  #
-  # ## microclimate file actions ----
-  # observeEvent(input$micro_DATASET, ignoreInit = TRUE,  {
-  #
-  #   # Read microclimate upload
-  #   rv$micro <- vroom(req(input$micro_DATASET)$datapath)
-  #
-  #   # show microclimate content
-  #   output$micro_DATASET <- renderDT(rv$micro, options = list(scrollX = TRUE))
-  #
-  #   # show other hidden boxes
-  #   showElement("box_micro_DATASET")
-  # })
-  #
-  # # Download button for the microclimate example (HOBO Mormal)
-  # output$dl_micro_ex <- downloadHandler(
-  #   filename = "microclimate.csv",
-  #   content = function(file) {
-  #     file.copy("exemple_data/microclimate.csv", file)
-  #   },
-  #   contentType = "text/csv"
-  # )
-  #
-  # ## Reaction to 'Continue' button ----
-  # observeEvent(input$btn_DATASET_LOADED, ignoreInit = TRUE, {
-  #   print("Reaction to btn_DATASET_LOADED")
-  #   shinyjs::show("nav_item_macro")
-  #   shinyjs::hide("tab_LOAD")
-  #   shinyjs::show("tab_MACRO")
-  #   shinyjs::removeClass("nav_link_load", "active")
-  #   shinyjs::addClass("nav_link_taxo", "active")
-  # }) # end of "reaction to 'Continue' button
-  #
+  ## Load ----
+  observeEvent(input$micro_DATASET, ignoreInit = TRUE,  {
+    rv$micro <- vroom(req(input$micro_DATASET)$datapath)
+    updateSelectInput(session, "sel_micro_time",
+                      choices = c("<unselected>", names(rv$micro)))
+    updateSelectInput(session, "sel_micro_tas",
+                      choices = c("<unselected>", names(rv$micro)))
+    showElement("id_micro_time")
+    showElement("id_micro_tas")
+    showElement("btn_load_micro")
+  })
+
+  ## Download --
+  output$dl_micro_ex <- downloadHandler(
+    filename = "microclimate.csv",
+    content = function(file) {
+      file.copy("exemple_data/microclimate.csv", file)
+    },
+    contentType = "text/csv"
+  )
+
+  ## Preview ----
+  observeEvent(input$btn_load_micro, ignoreInit = TRUE, {
+    output$out_micro_gg <- renderPlot({
+      rv$data <- rv$micro %>%
+        select(.data[[input$sel_micro_time]], .data[[input$sel_micro_tas]]) %>%
+        rename(time = .data[[input$sel_micro_time]],
+               tas_micro = .data[[input$sel_micro_tas]]) %>%
+        left_join(
+          rv$macro %>%
+            select(.data[[input$sel_macro_time]],
+                   .data[[input$sel_macro_tas]]) %>%
+            rename(time = .data[[input$sel_macro_time]],
+                 tas_macro = .data[[input$sel_macro_tas]])
+        )
+      summary(rv$data)
+      rv$data %>%
+        gather(source, tas, -time) %>%
+        mutate(source = gsub("tas_", "", source)) %>%
+        ggplot(aes(time, tas, col = source)) +
+        geom_line() +
+        theme_bw()
+    })
+  })
+
   # # MACROCLIMATE ---------------------------------------------------------------
   # observeEvent(input$btn_DATASET_LOADED, ignoreInit = TRUE, {
-  #   output$out_macro <- renderPlot({
-  #     rv$macro %>%
-  #       ggplot(aes(time, tas)) +
-  #       geom_line() +
-  #       theme_bw()
-  #   })
   #   rv$macro_f <- rv$macro %>%
   #     do(fft = fft_roll(., 24 * 5, "time", "tas")) %>%
   #     unnest(fft)

@@ -72,23 +72,56 @@ page <- page_sidebar(
     div(class = "nav-item",
         tags$a(
           class = "nav-link-custom active",
-          id = "nav_link_load",
+          id = "nav_link_home",
           href = "#",
-          onclick = "Shiny.setInputValue('selected_tab', 'tab_LOAD', {priority: 'event'}); return false;",
-          icon("upload"), " Load Dataset"
+          onclick = "Shiny.setInputValue('selected_tab', 'tab_home', {priority: 'event'}); return false;",
+          icon("house"), " Home"
         )
     ),
-    hidden(div(
+    div(
       class = "nav-item",
       id = "nav_item_macro",
       tags$a(
         class = "nav-link-custom",
         id = "nav_link_macro",
         href = "#",
-        onclick = "Shiny.setInputValue('selected_tab', 'tab_MACRO', {priority: 'event'}); return false;",
+        onclick = "Shiny.setInputValue('selected_tab', 'tab_macro', {priority: 'event'}); return false;",
         icon("earth-europe"), " Macroclimate"
       )
-    )),
+    ) %>% hidden(),
+    div(
+      class = "nav-item",
+      id = "nav_item_micro",
+      tags$a(
+        class = "nav-link-custom",
+        id = "nav_link_micro",
+        href = "#",
+        onclick = "Shiny.setInputValue('selected_tab', 'tab_micro', {priority: 'event'}); return false;",
+        icon("tree"), " Microclimate"
+      )
+    ) %>% hidden(),
+    div(
+      class = "nav-item",
+      id = "nav_item_fft",
+      tags$a(
+        class = "nav-link-custom",
+        id = "nav_link_fft",
+        href = "#",
+        onclick = "Shiny.setInputValue('selected_tab', 'tab_fft', {priority: 'event'}); return false;",
+        icon("wave-square"), " Fast Fourier Transform"
+      )
+    ) %>% hidden(),
+    div(
+      class = "nav-item",
+      id = "nav_item_buffer",
+      tags$a(
+        class = "nav-link-custom",
+        id = "nav_link_buffer",
+        href = "#",
+        onclick = "Shiny.setInputValue('selected_tab', 'tab_buffer', {priority: 'event'}); return false;",
+        icon("tree"), " Microclimate buffer"
+      )
+    ) %>% hidden(),
 
     HTML('
          <div style="text-align: center;">
@@ -99,7 +132,9 @@ page <- page_sidebar(
   ),
 
   # MODULES ----
-  home_ui("tab_LOAD"),
-  hidden(macro_ui("tab_MACRO"))
-
+  home_ui("tab_home"),
+  macro_ui("tab_macro") %>% hidden(),
+  micro_ui("tab_micro") %>% hidden(),
+  fft_ui("tab_fft") %>% hidden(),
+  buffer_ui("tab_buffer") %>% hidden()
 )

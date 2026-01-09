@@ -1,6 +1,4 @@
-# Modern BIOMASS Application UI with bslib
-
-# Define theme
+# THEME ----
 app_theme <- bs_theme(
   version = 5,
   preset = "bootstrap",
@@ -11,12 +9,13 @@ app_theme <- bs_theme(
   code_font = font_google("Fira Code")
 )
 
+# PAGE ----
 page <- page_sidebar(
   title = "microclimr Application",
   theme = app_theme,
   fillable = FALSE,
 
-  # Sidebar with vertical navigation
+  # * sidebar ----
   sidebar = sidebar(
     width = 250,
     bg = "#4b6285",
@@ -66,12 +65,10 @@ page <- page_sidebar(
           background-color: #459433 !important; }
       "))
     ),
-
-
     useShinyFeedback(),
     useShinyjs(),
 
-    # Manage navigation items ----
+    # * navigation items ----
     div(class = "nav-item",
         tags$a(
           class = "nav-link-custom active",
@@ -81,7 +78,6 @@ page <- page_sidebar(
           icon("upload"), " Load Dataset"
         )
     ),
-
     hidden(div(
       class = "nav-item",
       id = "nav_item_macro",
@@ -102,138 +98,8 @@ page <- page_sidebar(
     legalNoticeBslib(2025, "UR F&S")
   ),
 
-  # Load dataset ----
-  div(
-    id = "tab_LOAD",
-    class = "tab-content",
-
-    card(
-      card_header("Getting Started", class = "custom_card_header"),
-      card_body(
-        markdown("
-To estimate the **microclimate buffer effect** of a forest inventory, **2 sources** are required:
-
-- The **macroclimatic data** representing temperature outside the forest or above the canopy surface
-- The **microclimatic data** representing temperature inside the forest for a given height
-
-For each dataset, **2 variables** are required:
-
-- The **datetime** giving the date and time of measurement
-- The **temperature** giving sensor or model estimated temperature
-        ")
-      )
-    ),
-
-    layout_columns(
-      col_widths = c(6, 6),
-
-      ## Macroclimate File Card ----
-      card(
-        width = 12,
-        card_header("Macroclimate File", class = "custom_card_header"),
-        card_body(
-          fileInput(
-            "macro_DATASET",
-            "Choose a CSV file",
-            accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
-            buttonLabel = "Browse...",
-            placeholder = "No file selected",
-            multiple = FALSE
-          ) |> helper(colour = "#4b6285", content = "macro_dataset"),
-
-          hr(),
-
-          p("Do you ", strong("need an example"), " of macroclimate data?"),
-          p("Click the button below to download it."),
-          downloadButton("dl_macro_ex", "Download Example", class = "btn-outline-primary") |>
-            helper(colour = "#4b6285", content = "macro_example", size = "l")
-        )
-      ),
-
-      ## Microclimate File Card ----
-      card(
-        width = 12,
-        card_header("Microclimate File", class = "custom_card_header"),
-        card_body(
-          fileInput(
-            "micro_DATASET",
-            "Choose a CSV file",
-            accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
-            buttonLabel = "Browse...",
-            placeholder = "No file selected",
-            multiple = FALSE
-          ) |> helper(colour = "#4b6285", content = "micro_dataset"),
-
-          hr(),
-
-          p("Do you ", strong("need an example"), " of microclimate data?"),
-          p("Click the button below to download it."),
-          downloadButton("dl_micro_ex", "Download Example", class = "btn-outline-primary") |>
-            helper(colour = "#4b6285", content = "micro_example", size = "l")
-        )
-      ),
-
-    ),
-
-    # Continue Button
-    div(
-      class = "text-center my-4",
-      actionButton("btn_DATASET_LOADED", strong("Continue"), class = "btn-lg btn-primary text-white")
-    ),
-
-    ## Data Preview Cards ----
-    layout_columns(
-      col_widths = c(6, 6),
-
-      hidden(card(
-        id = "box_macro_DATASET",
-        card_header("Macroclimate Data Preview"),
-        card_body(
-          div(
-            DT::DTOutput("macro_DATASET"),
-            style = "max-height: 400px; overflow-y: auto;"
-          )
-        )
-      )),
-
-      hidden(card(
-        id = "box_micro_DATASET",
-        card_header("Microclimate Data Preview"),
-        card_body(
-          div(
-            DT::DTOutput("micro_DATASET"),
-            style = "max-height: 400px; overflow-y: auto;"
-          )
-        )
-      ))
-
-    ),
-
-  ),
-
-  # Macroclimate ----
-  hidden(div(
-    id = "tab_MACRO",
-    class = "tab-content",
-
-    card(
-      card_header("Macroclimate", class = "custom_card_header"),
-      card_body(
-        div(
-          plotOutput(outputId = "out_macro")
-        )
-      )
-    ),
-
-    card(
-      card_header("Decomposition", class = "custom_card_header"),
-      card_body(
-        div(
-          plotOutput(outputId = "out_macro_ps")
-        )
-      )
-    )
-
-  )),
+  # MODULES ----
+  home_ui("tab_LOAD"),
+  hidden(macro_ui("tab_MACRO"))
 
 )

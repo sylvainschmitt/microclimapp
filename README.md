@@ -19,7 +19,29 @@ devtools::install_github("sylvainschmitt/miroclimapp")
 
 ## Usage
 
-```r
+``` r
 library(miroclimapp)
 run_app()
 ```
+
+## Include
+
+-   Introduction
+    -   to be defined
+-   Macroclimate
+    -   load (including factors)
+    -   visualize
+    -   filter
+    -   aggregate
+-   Microclimate
+    -   load (including factors)
+    -   visualize
+    -   filter
+    -   aggregate
+-   Decompose
+    -   fft roll parameters
+    -   power spectrum visualization
+-   Buffer
+    -   Relation for a given period
+    -   Energy dissipation figure and table
+

@@ -42,7 +42,8 @@ function(input, output, session) {
   rv <- reactiveValues(
     macro = NULL, # macroclimate dataframe
     micro = NULL, # microclimate dataframe
-    data = NULL # whole dataset
+    data = NULL, # whole dataset
+    fft = NULL # FFT decomposition
   )
 
   ## Buttons ----
@@ -148,7 +149,7 @@ function(input, output, session) {
             select(.data[[input$sel_macro_time]],
                    .data[[input$sel_macro_tas]]) %>%
             rename(time = .data[[input$sel_macro_time]],
-                 tas_macro = .data[[input$sel_macro_tas]])
+                   tas_macro = .data[[input$sel_macro_tas]])
         )
       summary(rv$data)
       rv$data %>%
@@ -160,28 +161,40 @@ function(input, output, session) {
     })
   })
 
-  # # MACROCLIMATE ---------------------------------------------------------------
-  # observeEvent(input$btn_DATASET_LOADED, ignoreInit = TRUE, {
-  #   rv$macro_f <- rv$macro %>%
-  #     do(fft = fft_roll(., 24 * 5, "time", "tas")) %>%
-  #     unnest(fft)
-  #   output$out_macro_ps <- renderPlot({
-  #     rv$macro_f %>%
-  #       group_by(frequency, period) %>%
-  #       summarise(sd = sd(power), power = mean(power)) %>%
-  #       ggplot(aes(frequency, power+1)) +
-  #       geom_col() +
-  #       geom_linerange(aes(ymin = power+1-sd, ymax = power+1+sd)) +
-  #       theme_bw() +
-  #       xlab("Period [h]") +
-  #       ylab("Power") +
-  #       scale_x_continuous(
-  #         breaks = c(0, 1 / 24, 1 / 12, 1 / 8, 1 / 6, 1 / 3),
-  #         labels = c("0", "24", "12", "8", "6", "3")
-  #       ) +
-  #       theme(legend.position.inside = c(0.8, 0.8)) +
-  #       scale_y_log10()
-  #   })
-  # })
+  # FFT ----
+  observeEvent(input$btn_run_fft, ignoreInit = TRUE, {
+    freq <- 24
+    windows_d <- as.numeric(input$sel_windows_d)
+    slide_d <- as.numeric(input$sel_slide_d)
+    rv$fft <- rv$data %>%
+      gather(source, tas, -time) %>%
+      mutate(source = gsub("tas_", "", source)) %>%
+      group_by(source) %>%
+      do(fft = fft_roll(.,
+                        freq * windows_d,
+                        "time",
+                        "tas",
+                        window = paste(windows_d, "days"),
+                        step = paste(slide_d, "days")
+                        )) %>%
+      unnest(fft)
+    output$out_fft_gg <- renderPlot({
+      rv$fft %>%
+        group_by(source, frequency, period) %>%
+        summarise(sd = sd(power), power = mean(power)) %>%
+        ggplot(aes(frequency, power+1, fill = source)) +
+        geom_col(position = position_dodge()) +
+        theme_bw() +
+        xlab("Period [h]") +
+        ylab("Power") +
+        scale_x_continuous(
+          breaks = c(0, 1 / 24, 1 / 12, 1 / 8, 1 / 6, 1 / 3),
+          labels = c("0", "24", "12", "8", "6", "3")
+        ) +
+        theme(legend.position.inside = c(0.8, 0.8)) +
+        scale_y_log10()
+    })
+  })
+
 
 }

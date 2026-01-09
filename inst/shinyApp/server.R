@@ -94,11 +94,11 @@ function(input, output, session) {
     showElement("btn_load_macro")
   })
 
-  ## Download --
+  ## Download ----
   output$dl_macro_ex <- downloadHandler(
     filename = "macroclimate.csv",
     content = function(file) {
-      file.copy("exemple_data/macroclimate.csv", file)
+      file.copy("example_data/macroclimate.csv", file)
     },
     contentType = "text/csv"
   )
@@ -128,11 +128,11 @@ function(input, output, session) {
     showElement("btn_load_micro")
   })
 
-  ## Download --
+  ## Download ----
   output$dl_micro_ex <- downloadHandler(
     filename = "microclimate.csv",
     content = function(file) {
-      file.copy("exemple_data/microclimate.csv", file)
+      file.copy("example_data/microclimate.csv", file)
     },
     contentType = "text/csv"
   )
@@ -196,5 +196,35 @@ function(input, output, session) {
     })
   })
 
-
+  # BUFFER ----
+  observeEvent(input$btn_fft_done, ignoreInit = TRUE, {
+    updateSelectInput(session, "sel_period",
+                      choices = unique(rv$fft$period))
+    output$out_period_gg <- renderPlot({
+      rv$fft %>%
+        select(-coefficient) %>%
+        filter(period == as.integer(input$sel_period)) %>%
+        pivot_wider(names_from = source, values_from = power) %>%
+        ggplot(aes(micro, macro)) +
+        geom_point() +
+        geom_smooth(method = "lm", formula = " y ~ x") +
+        theme_bw() +
+        xlab("Macro temperature [°C]") +
+        ylab("Micro temperature [°C]") +
+        coord_equal() +
+        theme(legend.position = "bottom")
+      })
+    output$out_energy_gg <- renderPlot({
+      rv$fft %>%
+        group_by(source, datetime) %>%
+        summarise(energy = fft_energy(coefficient)) %>%
+        pivot_wider(names_from = source, values_from = energy) %>%
+        ggplot(aes(micro/macro)) +
+        geom_histogram() +
+        theme_bw() +
+        ylab("") +
+        xlab("") +
+        theme(legend.position = "bottom")
+    })
+  })
 }

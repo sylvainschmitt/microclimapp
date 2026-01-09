@@ -10,7 +10,6 @@ suppressPackageStartupMessages({
   library(microclimr)
   library(tidyr)
   library(dplyr)
-  library(plotly)
 })
 
 source("legal_notice.R")

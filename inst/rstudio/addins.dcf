@@ -1,0 +1,4 @@
+Name: microclimapp
+Description: Graphical user application for microclimr
+Binding: app
+Interactive: true

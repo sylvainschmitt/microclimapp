@@ -206,11 +206,12 @@ function(input, output, session) {
         filter(period == as.integer(input$sel_period)) %>%
         pivot_wider(names_from = source, values_from = power) %>%
         ggplot(aes(micro, macro)) +
+        geom_abline() +
         geom_point() +
         geom_smooth(method = "lm", formula = " y ~ x") +
         theme_bw() +
-        xlab("Macro temperature [°C]") +
-        ylab("Micro temperature [°C]") +
+        xlab("Micro temperature [°C]") +
+        ylab("Macro temperature [°C]") +
         coord_equal() +
         theme(legend.position = "bottom")
       })

@@ -1,5 +1,9 @@
 # microclimapp 0.0.1.9003
 
+- Jonathan's review 1/12
+
+# microclimapp 0.0.1.9003
+
 - home, macro, micro, fft, and buffer draft
 
 # microclimapp 0.0.1.9002
